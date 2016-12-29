@@ -1,0 +1,17 @@
+# Singularity
+*.img
+
+# Slurm
+*.out
+
+# Data
+*.tar.xz
+*.tar.bz2
+data/z_stack
+
+# Separate git repo
+pipeline.cpproj
+RNAi_plate_analysis_104
+
+# Emacs
+*~
