@@ -42,11 +42,13 @@ singularity run \
 $(CELLPROFILER_SINGULARITY_IMAGE)
 endef
 
+.PHONY : upload
+tarball : $(UPLOAD_TARBALL)
 $(UPLOAD_TARBALL) : $(OUT_TARBALL)
 	cp -arv $< $@
 
-$(OUT_TARBALL) : $(CELLPROFILER_DONE_FILE)
-	cd $(@D); $(load_xz_module) time tar -I xz -cf $(@F) $(notdir $(OUR_DIR))
+$(OUT_TARBALL) :
+	cd $(@D); $(load_xz_module) time tar -I xz -cf $(@F) $(notdir $(OUT_DIR))
 
 # No error exit code from cellprofiler even on failure; therefore use
 # --done-file instead.
@@ -57,7 +59,7 @@ $(CELLPROFILER_DONE_FILE) : $(IN_FILELIST)
 	--run-headless \
 	--run \
 	--pipeline=$(IN_PIPELINE) \
-	--output-directory=$(dir $(CELLPROFILER_DONE_FILE)) \
+	--output-directory=$(OUT_DIR) \
 	--file-list=$(IN_FILELIST) \
 	--done-file=$@
 	grep Failure $@ || rm $@
@@ -67,7 +69,7 @@ $(CELLPROFILER_DONE_FILE) : $(IN_FILELIST)
 cellprofiler : $(IN_FILELIST)
 	$(cellprofiler) \
 	--pipeline=$(IN_PIPELINE) \
-	--output-directory=$(dir $(CELLPROFILER_DONE_FILE)) \
+	--output-directory=$(OUT_DIR) \
 	--file-list=$(IN_FILELIST)
 
 .PHONY : unpack
