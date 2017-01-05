@@ -1,0 +1,45 @@
+# -*- mode: rpm-spec -*-
+
+# Singularity bootstrap for CellProfiler
+# Host OS used is CentOS Linux release 7.3.1611 (Core)
+
+BootStrap: yum
+OSVersion: 7
+MirrorURL: http://mirror.centos.org/centos-%{OSVERSION}/%{OSVERSION}/os/$basearch/
+Include: yum
+
+%runscript
+	echo "Running cellprofiler-analyst"
+	exec /usr/bin/python /opt/CellProfiler-Analyst*/CellProfiler-Analyst.py
+
+%post
+	echo "Installing OS dependencies for CellProfiler-Analyst"
+	# NUMPY_DEPS="lapack-devel gcc-c++"
+	# SCIPY_DEPS="atlas-devel python-devel"
+	# MATPLOTLIB_DEPS="libpng-devel freetype-devel"
+	JAVABRIDGE_DEPS="java-1.8.0-openjdk-devel gcc python-devel"
+	CPA_DEPS="wget tar gzip python2-pip mysql-devel wxPython-devel"
+	yum -y install epel-release # For python2-pip
+	yum -y install $SCIPY_DEPS $MATPLOTLIB_DEPS $JAVABRIDGE_DEPS $CPA_DEPS
+
+	echo "Installing CellProfiler-Analyst"
+	PN=CellProfiler-Analyst; V=2.2.1; P=$PN-$V; TARBALL=$V.tar.gz # Gentoo's naming convention
+	cd /tmp			# Download directory
+	wget -nc https://github.com/CellProfiler/$PN/archive/$V.tar.gz
+	cd /opt			# CellProfiler-Analyst install prefix
+	test -d $P || tar -xvpf /tmp/$TARBALL
+	cd $P
+	pip install --upgrade pip
+	pip install numpy
+	pip install javabridge python-bioformats verlib seaborn sklearn pillow
+	# Add symlink to be able to test using import
+	ln -sf $PN.py CellProfiler_Analyst.py
+
+	echo "HPC cluster specific mount bind points"
+	# See http://singularity.lbl.gov/docs-mount
+	mkdir -p /work /scratch/scratch{2,3}
+	exit 0
+
+%test
+	cd /opt/CellProfiler-Analyst*
+	/usr/bin/python -c 'import CellProfiler_Analyst'
