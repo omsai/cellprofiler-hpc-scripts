@@ -7,7 +7,7 @@
 # available here:
 # https://gist.github.com/omsai/a6394fc38c9224f681bd732c4836611f
 
-SHARE = /scratch/scratch3
+SHARE = /scratch
 SCRATCH = /work
 SHARE_PREFIX = $(SHARE)/$(USER)
 SCRATCH_PREFIX = $(SCRATCH)/$(USER)
